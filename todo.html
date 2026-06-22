@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced To-Do List App</title>
+
+    <style>
+
+        body{
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .container{
+            max-width: 500px;
+            width: 90%;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px lightgray;
+        }
+
+        h1{
+            text-align: center;
+            color: #0077cc;
+        }
+
+        input{
+            width: 65%;
+            padding: 10px;
+        }
+
+        button{
+            padding: 10px;
+            border: none;
+            background: #0077cc;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover{
+            background: #005fa3;
+        }
+
+        li{
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            list-style: none;
+            border-radius: 5px;
+        }
+
+        .deleteBtn{
+            float: right;
+            background: red;
+        }
+
+        .completed{
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        .dark{
+            background-color: #222;
+            color: white;
+        }
+
+        .dark .container{
+            background-color: #333;
+        }
+
+        .dark li{
+            background-color: #444;
+            color: white;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>To-Do List App</h1>
+
+    <button onclick="toggleDarkMode()">
+        Dark Mode
+    </button>
+
+    <p>
+        Total Tasks:
+        <span id="totalTasks">0</span>
+    </p>
+
+    <p>
+        Completed Tasks:
+        <span id="completedTasks">0</span>
+    </p>
+
+    <input
+        type="text"
+        id="taskInput"
+        placeholder="Enter a task">
+
+    <button onclick="addTask()">
+        Add
+    </button>
+
+    <ul id="taskList"></ul>
+
+</div>
+
+<script>
+
+loadTasks();
+
+function addTask()
+{
+    let taskInput =
+    document.getElementById("taskInput");
+
+    let task =
+    taskInput.value.trim();
+
+    if(task == "")
+    {
+        alert("Please enter a task");
+        return;
+    }
+
+    createTask(task,false);
+
+    taskInput.value = "";
+
+    saveTasks();
+    updateCounts();
+}
+
+function createTask(taskText,isCompleted)
+{
+    let li =
+    document.createElement("li");
+
+    if(isCompleted)
+    {
+        li.classList.add("completed");
+    }
+
+    li.innerHTML =
+    taskText +
+    ' <button class="deleteBtn" onclick="deleteTask(this)">Delete</button>';
+
+    li.addEventListener("click", function(event)
+    {
+        if(event.target.tagName !== "BUTTON")
+        {
+            li.classList.toggle("completed");
+
+            saveTasks();
+            updateCounts();
+        }
+    });
+
+    document.getElementById("taskList")
+    .appendChild(li);
+}
+
+function deleteTask(button)
+{
+    button.parentElement.remove();
+
+    saveTasks();
+    updateCounts();
+}
+
+function updateCounts()
+{
+    let total =
+    document.querySelectorAll("#taskList li").length;
+
+    let completed =
+    document.querySelectorAll("#taskList li.completed").length;
+
+    document.getElementById("totalTasks").innerHTML =
+    total;
+
+    document.getElementById("completedTasks").innerHTML =
+    completed;
+}
+
+function saveTasks()
+{
+    let tasks = [];
+
+    document
+    .querySelectorAll("#taskList li")
+    .forEach(function(li)
+    {
+        tasks.push({
+            text:
+            li.childNodes[0].textContent.trim(),
+
+            completed:
+            li.classList.contains("completed")
+        });
+    });
+
+    localStorage.setItem(
+        "tasks",
+        JSON.stringify(tasks)
+    );
+}
+
+function loadTasks()
+{
+    let savedTasks =
+    JSON.parse(
+        localStorage.getItem("tasks")
+    ) || [];
+
+    savedTasks.forEach(function(task)
+    {
+        createTask(
+            task.text,
+            task.completed
+        );
+    });
+
+    updateCounts();
+}
+
+document
+.getElementById("taskInput")
+.addEventListener("keypress",
+function(event)
+{
+    if(event.key === "Enter")
+    {
+        addTask();
+    }
+});
+
+function toggleDarkMode()
+{
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+        "darkMode",
+        document.body.classList.contains("dark")
+    );
+}
+
+if(
+    localStorage.getItem("darkMode")
+    === "true"
+)
+{
+    document.body.classList.add("dark");
+}
+
+</script>
+
+</body>
+</html>
